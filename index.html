@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#102a43" />
+  <title>Neonatal Calculations Challenge</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #102a43;
+      --blue: #2f6f9f;
+      --blue-soft: #eaf4fb;
+      --ink: #243b53;
+      --muted: #627d98;
+      --line: #d9e2ec;
+      --surface: #ffffff;
+      --page: #f2f7fb;
+      --success: #19723b;
+      --success-bg: #e9f8ee;
+      --danger: #b42318;
+      --danger-bg: #fff0ee;
+      --shadow: 0 16px 40px rgba(16, 42, 67, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(47, 111, 159, 0.15), transparent 34rem),
+        var(--page);
+    }
+
+    button, input { font: inherit; }
+
+    .page {
+      width: min(980px, calc(100% - 32px));
+      margin: 32px auto;
+    }
+
+    .app-shell {
+      overflow: hidden;
+      border: 1px solid rgba(217, 226, 236, 0.95);
+      border-radius: 24px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    header {
+      padding: 30px 32px 26px;
+      color: white;
+      background: linear-gradient(135deg, var(--navy), #1f4f72);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      opacity: 0.78;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.65rem);
+      line-height: 1.08;
+    }
+
+    header p:last-child {
+      max-width: 700px;
+      margin: 12px 0 0;
+      color: #d9eaf5;
+      line-height: 1.6;
+    }
+
+    main { padding: 30px 32px 34px; }
+
+    .instructions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+      padding: 12px 14px;
+      border: 1px solid #c8ddeb;
+      border-radius: 14px;
+      color: #174c6d;
+      background: var(--blue-soft);
+      font-weight: 700;
+    }
+
+    .case-grid,
+    .answer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fbfdff;
+    }
+
+    .panel h2 {
+      margin: 0 0 15px;
+      color: var(--navy);
+      font-size: 1.05rem;
+    }
+
+    .data-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .data-row:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .data-row dt { color: var(--muted); }
+    .data-row dd { margin: 0; font-weight: 800; text-align: right; }
+
+    .divider {
+      height: 1px;
+      margin: 28px 0;
+      background: var(--line);
+    }
+
+    .answer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .field {
+      position: relative;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .field.correct {
+      border-color: #70c58b;
+      background: #fbfffc;
+    }
+
+    .field.incorrect {
+      border-color: #ef8e86;
+      background: #fffafa;
+    }
+
+    label {
+      display: block;
+      min-height: 42px;
+      margin-bottom: 9px;
+      color: var(--navy);
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid #bcccdc;
+      border-radius: 10px;
+      color: var(--ink);
+      background: white;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(47, 111, 159, 0.16);
+    }
+
+    .unit { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+
+    .feedback {
+      min-height: 20px;
+      margin: 9px 0 0;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .correct .feedback { color: var(--success); }
+    .incorrect .feedback { color: var(--danger); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    button {
+      min-height: 44px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform 120ms ease, opacity 120ms ease, box-shadow 120ms ease;
+    }
+
+    button:hover:not(:disabled) { transform: translateY(-1px); }
+    button:active:not(:disabled) { transform: translateY(0); }
+
+    .primary {
+      color: white;
+      background: var(--blue);
+      box-shadow: 0 6px 16px rgba(47, 111, 159, 0.25);
+    }
+
+    .secondary {
+      color: var(--navy);
+      border: 1px solid #bcccdc;
+      background: white;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+      box-shadow: none;
+    }
+
+    .unlock {
+      display: none;
+      margin-top: 24px;
+      padding: 22px;
+      border: 1px solid #91d7a6;
+      border-radius: 18px;
+      background: var(--success-bg);
+      text-align: center;
+      animation: pop 260ms ease-out;
+    }
+
+    .unlock.show { display: block; }
+
+    .unlock p {
+      margin: 0;
+      color: var(--success);
+      font-size: clamp(1.05rem, 3vw, 1.35rem);
+      font-weight: 900;
+    }
+
+    .letter {
+      display: inline-grid;
+      place-items: center;
+      width: 72px;
+      height: 72px;
+      margin-top: 14px;
+      border-radius: 50%;
+      color: white;
+      background: var(--success);
+      font-size: 2.7rem;
+      font-weight: 950;
+      box-shadow: 0 9px 20px rgba(25, 114, 59, 0.24);
+    }
+
+    .general-message {
+      display: none;
+      margin-top: 18px;
+      padding: 12px 14px;
+      border: 1px solid #f5b8b2;
+      border-radius: 12px;
+      color: var(--danger);
+      background: var(--danger-bg);
+      font-weight: 700;
+    }
+
+    .general-message.show { display: block; }
+
+    footer {
+      padding: 18px 32px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: #f8fbfd;
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    @keyframes pop {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 20px, 980px); margin: 10px auto; }
+      .app-shell { border-radius: 18px; }
+      header, main { padding-left: 20px; padding-right: 20px; }
+      .case-grid, .answer-grid { grid-template-columns: 1fr; }
+      label { min-height: auto; }
+      footer { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="app-shell" aria-labelledby="page-title">
+      <header>
+        <p class="eyebrow">Locked calculation challenge</p>
+        <h1 id="page-title">Neonatal Calculations Challenge</h1>
+        <p>Use the clinical data below to calculate all three values. The letter is revealed only after every answer is correct.</p>
+      </header>
+
+      <main>
+        <div class="instructions" role="note">
+          <span aria-hidden="true">✎</span>
+          Round each answer to the nearest tenth.
+        </div>
+
+        <section class="case-grid" aria-label="Clinical case data">
+          <article class="panel">
+            <h2>Respiratory Data</h2>
+            <dl class="data-list">
+              <div class="data-row"><dt>FiO₂</dt><dd id="fio2">—</dd></div>
+              <div class="data-row"><dt>Mean airway pressure</dt><dd><span id="mean-airway">—</span> cm H₂O</dd></div>
+              <div class="data-row"><dt>PaO₂</dt><dd><span id="pao2">—</span> mmHg</dd></div>
+              <div class="data-row"><dt>PaCO₂</dt><dd><span id="paco2">—</span> mmHg</dd></div>
+            </dl>
+          </article>
+
+          <article class="panel">
+            <h2>Hemodynamic Data</h2>
+            <dl class="data-list">
+              <div class="data-row"><dt>Heart rate</dt><dd><span id="heart-rate">—</span> bpm</dd></div>
+              <div class="data-row"><dt>Systolic blood pressure</dt><dd><span id="sbp">—</span> mmHg</dd></div>
+              <div class="data-row"><dt>Diastolic blood pressure</dt><dd><span id="dbp">—</span> mmHg</dd></div>
+            </dl>
+          </article>
+        </section>
+
+        <div class="divider"></div>
+
+        <form id="quiz-form" novalidate>
+          <section class="answer-grid" aria-label="Calculation answers">
+            <div class="field" id="field-oi">
+              <label for="answer-oi">Oxygenation Index</label>
+              <div class="input-wrap">
+                <input id="answer-oi" type="number" inputmode="decimal" step="0.1" autocomplete="off" aria-describedby="feedback-oi" />
+              </div>
+              <p class="feedback" id="feedback-oi" aria-live="polite"></p>
+            </div>
+
+            <div class="field" id="field-aa">
+              <label for="answer-aa">Alveolar-arterial oxygen gradient</label>
+              <div class="input-wrap">
+                <input id="answer-aa" type="number" inputmode="decimal" step="0.1" autocomplete="off" aria-describedby="feedback-aa" />
+                <span class="unit">mmHg</span>
+              </div>
+              <p class="feedback" id="feedback-aa" aria-live="polite"></p>
+            </div>
+
+            <div class="field" id="field-map">
+              <label for="answer-map">Mean Arterial Pressure</label>
+              <div class="input-wrap">
+                <input id="answer-map" type="number" inputmode="decimal" step="0.1" autocomplete="off" aria-describedby="feedback-map" />
+                <span class="unit">mmHg</span>
+              </div>
+              <p class="feedback" id="feedback-map" aria-live="polite"></p>
+            </div>
+          </section>
+
+          <div class="actions">
+            <button class="primary" id="check-button" type="submit" disabled>Check Answers</button>
+            <button class="secondary" id="new-case-button" type="button">New Case</button>
+          </div>
+        </form>
+
+        <div class="general-message" id="general-message" role="alert">
+          One or more answers are incorrect. Review your calculations and try again.
+        </div>
+
+        <section class="unlock" id="unlock" aria-live="assertive">
+          <p>Congratulations! You have earned the letter......P</p>
+          <div class="letter" aria-label="Letter P">P</div>
+        </section>
+      </main>
+
+      <footer>No formulas or answer key are displayed in this locked version.</footer>
+    </section>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const choices = {
+        fio2: [0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00],
+        meanAirway: [10, 12, 14, 16, 18, 20],
+        pao2: [40, 45, 50, 55, 60, 65, 70, 75],
+        paco2: [35, 40, 45, 50, 55, 60],
+        heartRate: [120, 130, 140, 150, 160],
+        sbp: [58, 62, 66, 70, 74, 78],
+        dbp: [30, 34, 38, 42, 46]
+      };
+
+      const elements = {
+        fio2: document.getElementById("fio2"),
+        meanAirway: document.getElementById("mean-airway"),
+        pao2: document.getElementById("pao2"),
+        paco2: document.getElementById("paco2"),
+        heartRate: document.getElementById("heart-rate"),
+        sbp: document.getElementById("sbp"),
+        dbp: document.getElementById("dbp"),
+        form: document.getElementById("quiz-form"),
+        checkButton: document.getElementById("check-button"),
+        newCaseButton: document.getElementById("new-case-button"),
+        generalMessage: document.getElementById("general-message"),
+        unlock: document.getElementById("unlock"),
+        inputs: {
+          oi: document.getElementById("answer-oi"),
+          aa: document.getElementById("answer-aa"),
+          map: document.getElementById("answer-map")
+        },
+        fields: {
+          oi: document.getElementById("field-oi"),
+          aa: document.getElementById("field-aa"),
+          map: document.getElementById("field-map")
+        },
+        feedback: {
+          oi: document.getElementById("feedback-oi"),
+          aa: document.getElementById("feedback-aa"),
+          map: document.getElementById("feedback-map")
+        }
+      };
+
+      let currentCase = null;
+
+      function pick(values) {
+        return values[Math.floor(Math.random() * values.length)];
+      }
+
+      function roundToTenth(value) {
+        return Math.round((value + Number.EPSILON) * 10) / 10;
+      }
+
+      function createCase() {
+        const fio2 = pick(choices.fio2);
+        const meanAirway = pick(choices.meanAirway);
+        const pao2 = pick(choices.pao2);
+        const paco2 = pick(choices.paco2);
+        const heartRate = pick(choices.heartRate);
+        const sbp = pick(choices.sbp);
+        const dbp = pick(choices.dbp);
+
+        return {
+          fio2,
+          meanAirway,
+          pao2,
+          paco2,
+          heartRate,
+          sbp,
+          dbp,
+          answers: {
+            oi: roundToTenth((fio2 * meanAirway * 100) / pao2),
+            aa: roundToTenth((fio2 * 713) - pao2 - paco2),
+            map: roundToTenth((sbp + (2 * dbp)) / 3)
+          }
+        };
+      }
+
+      function renderCase() {
+        elements.fio2.textContent = currentCase.fio2.toFixed(2);
+        elements.meanAirway.textContent = currentCase.meanAirway;
+        elements.pao2.textContent = currentCase.pao2;
+        elements.paco2.textContent = currentCase.paco2;
+        elements.heartRate.textContent = currentCase.heartRate;
+        elements.sbp.textContent = currentCase.sbp;
+        elements.dbp.textContent = currentCase.dbp;
+      }
+
+      function resetFeedback() {
+        ["oi", "aa", "map"].forEach((key) => {
+          elements.fields[key].classList.remove("correct", "incorrect");
+          elements.feedback[key].textContent = "";
+        });
+        elements.generalMessage.classList.remove("show");
+        elements.unlock.classList.remove("show");
+      }
+
+      function clearInputs() {
+        Object.values(elements.inputs).forEach((input) => {
+          input.value = "";
+          input.disabled = false;
+        });
+        elements.checkButton.disabled = true;
+      }
+
+      function startNewCase() {
+        currentCase = createCase();
+        renderCase();
+        clearInputs();
+        resetFeedback();
+        elements.inputs.oi.focus();
+      }
+
+      function allInputsCompleted() {
+        return Object.values(elements.inputs).every((input) => input.value.trim() !== "");
+      }
+
+      function updateButtonState() {
+        elements.checkButton.disabled = !allInputsCompleted();
+      }
+
+      function isCorrect(userValue, expectedValue) {
+        const numericValue = Number(userValue);
+        return Number.isFinite(numericValue) && Math.abs(numericValue - expectedValue) <= 0.11;
+      }
+
+      function markResult(key, correct) {
+        const field = elements.fields[key];
+        field.classList.remove("correct", "incorrect");
+        field.classList.add(correct ? "correct" : "incorrect");
+        elements.feedback[key].textContent = correct ? "✓ Correct" : "Not quite — try again";
+      }
+
+      function checkAnswers(event) {
+        event.preventDefault();
+        if (!allInputsCompleted()) return;
+
+        const results = {
+          oi: isCorrect(elements.inputs.oi.value, currentCase.answers.oi),
+          aa: isCorrect(elements.inputs.aa.value, currentCase.answers.aa),
+          map: isCorrect(elements.inputs.map.value, currentCase.answers.map)
+        };
+
+        Object.entries(results).forEach(([key, correct]) => markResult(key, correct));
+
+        const allCorrect = Object.values(results).every(Boolean);
+        elements.generalMessage.classList.toggle("show", !allCorrect);
+        elements.unlock.classList.toggle("show", allCorrect);
+
+        if (allCorrect) {
+          Object.values(elements.inputs).forEach((input) => { input.disabled = true; });
+          elements.checkButton.disabled = true;
+          elements.unlock.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+
+      Object.values(elements.inputs).forEach((input) => {
+        input.addEventListener("input", () => {
+          resetFeedback();
+          updateButtonState();
+        });
+      });
+
+      elements.form.addEventListener("submit", checkAnswers);
+      elements.newCaseButton.addEventListener("click", startNewCase);
+
+      startNewCase();
+    })();
+  </script>
+</body>
+</html>
